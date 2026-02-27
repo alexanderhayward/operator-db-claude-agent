@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Output & state files
+*.xlsx
+*.batch_state.json
+
+# Archives
+*.zip
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
