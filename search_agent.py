@@ -31,13 +31,12 @@ def build_search_prompt(operator_name: str, country: str) -> str:
 Search the web and find the following information:
 
 1. FINANCIAL DATA (latest available year):
-   - Total revenue (in USD or local currency, specify which)
-   - Mobile revenue
-   - Fixed revenue
-   - EBITDA and/or EBITDA margin
-   - Mobile subscribers (total)
-   - Fixed broadband subscribers
-   - Total subscribers (all services)
+   - Total revenue, Mobile revenue, Fixed revenue, EBITDA
+   - For each, provide TWO values:
+       (a) the original local-currency value as reported (e.g. "EUR 3.9B")
+       (b) the USD equivalent, converted using the average exchange rate for the data year (e.g. "USD 4.2B")
+   - EBITDA margin as a percentage
+   - Mobile subscribers (total), Fixed broadband subscribers, Total subscribers
 
 2. SERVICES:
    - Types of service offered: Mobile, Fixed, Satellite, Wholesale (list all that apply)
@@ -63,10 +62,14 @@ Return ONLY a JSON object in exactly this format:
   "country": "{country}",
   "international_group": "<name of international group or null if independent>",
   "data_year": "<year of financial data or null>",
-  "total_revenue": "<value with currency or null>",
-  "mobile_revenue": "<value with currency or null>",
-  "fixed_revenue": "<value with currency or null>",
-  "ebitda": "<value with currency or null>",
+  "total_revenue": "<USD value only, e.g. 'USD 4.2B' or null>",
+  "total_revenue_local": "<local currency value, e.g. 'EUR 3.9B' or null — same as total_revenue if already USD>",
+  "mobile_revenue": "<USD value only or null>",
+  "mobile_revenue_local": "<local currency value or null>",
+  "fixed_revenue": "<USD value only or null>",
+  "fixed_revenue_local": "<local currency value or null>",
+  "ebitda": "<USD value only or null>",
+  "ebitda_local": "<local currency value or null>",
   "ebitda_margin": "<percentage or null>",
   "mobile_subscribers": "<value or null>",
   "fixed_broadband_subscribers": "<value or null>",
@@ -151,7 +154,8 @@ def search_operator(operator_name: str, country: str) -> dict:
             ],
         )
         data = parse_response(response.content, operator_name, country)
-        print(f"  ✅ Done: {operator_name}")
+        usage = response.usage
+        print(f"  ✅ Done: {operator_name}  ({usage.input_tokens:,} in / {usage.output_tokens:,} out tokens)")
         return data
 
     except Exception as e:
